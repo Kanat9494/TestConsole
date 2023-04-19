@@ -20,12 +20,12 @@ public class Client
     TcpClient tcpClient;
     Server server;
 
-    public void Process()
+    public async Task Process()
     {
         try
         {
             Stream = tcpClient.GetStream();
-            string jsonMessage = GetMessage();
+            string jsonMessage = await GetMessageAsync();
             var message = JsonConvert.DeserializeObject<Message>(jsonMessage);
             userName = message.SenderName;
             UserName = message.SenderName;
@@ -45,7 +45,7 @@ public class Client
             {
                 try
                 {
-                    jsonMessage = GetMessage();
+                    jsonMessage = await GetMessageAsync();
                     message = JsonConvert.DeserializeObject<Message>(jsonMessage);
                     server.BroadcastMessage(jsonMessage, this.Id);
                 }
@@ -54,7 +54,7 @@ public class Client
                     //message = String.Format($"{userName}: покинул чат");
                     //Console.WriteLine(message);
                     //server.BroadcastMessage(message, this.Id);
-                    break;
+                    //break;
                 }
             }
         }
@@ -76,8 +76,25 @@ public class Client
         int bytes = 0;
         do
         {
+            builder.Length = 0;
             bytes = Stream.Read(data, 0, data.Length);
-            builder.Append(Encoding.Unicode.GetString(data, 0, bytes));
+            builder.Append(Encoding.UTF8.GetString(data, 0, bytes));
+        }
+        while (Stream.DataAvailable);
+
+        return builder.ToString();
+    }
+
+    private async Task<string> GetMessageAsync()
+    {
+        byte[] data = new byte[64];
+        StringBuilder builder = new StringBuilder();
+        int bytes = 0;
+        do
+        {
+            builder.Length = 0;
+            bytes = await Stream.ReadAsync(data, 0, data.Length);
+            builder.Append(Encoding.UTF8.GetString(data, 0, bytes));
         }
         while (Stream.DataAvailable);
 

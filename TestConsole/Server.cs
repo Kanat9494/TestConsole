@@ -31,8 +31,12 @@ public class Server
                 TcpClient tcpClient = tcpListener.AcceptTcpClient();
 
                 Client client = new Client(tcpClient, this);
-                Thread clientThread = new Thread(client.Process);
-                clientThread.Start();
+                //Thread clientThread = new Thread(client.Process);
+                //clientThread.Start();
+                Task.Run(async () =>
+                {
+                    await client.Process();
+                });
             }
         }
         catch (Exception ex)
@@ -45,7 +49,7 @@ public class Server
     protected internal void BroadcastMessage(string jsonMessage, string id)
     {
         var message = JsonConvert.DeserializeObject<Message>(jsonMessage);
-        byte[] data = Encoding.Unicode.GetBytes(message.Content);
+        byte[] data = Encoding.Unicode.GetBytes(message?.Content ?? "0");
         for (int i = 0; i < clients.Count; i++)
         {
             if (clients[i].Id != id)
