@@ -49,7 +49,7 @@ public class Server
     protected internal void BroadcastMessage(string jsonMessage, string id)
     {
         var message = JsonConvert.DeserializeObject<Message>(jsonMessage);
-        byte[] data = Encoding.Unicode.GetBytes(message?.Content ?? "0");
+        byte[] data = Encoding.UTF8.GetBytes(message?.Content ?? "0");
         for (int i = 0; i < clients.Count; i++)
         {
             if (clients[i].Id != id)

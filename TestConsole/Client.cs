@@ -51,10 +51,7 @@ public class Client
                 }
                 catch
                 {
-                    //message = String.Format($"{userName}: покинул чат");
-                    //Console.WriteLine(message);
-                    //server.BroadcastMessage(message, this.Id);
-                    //break;
+                    break;
                 }
             }
         }
@@ -87,16 +84,29 @@ public class Client
 
     private async Task<string> GetMessageAsync()
     {
-        byte[] data = new byte[64];
+        //byte[] data = new byte[64];
+        //StringBuilder builder = new StringBuilder();
+        //int bytes = 0;
+        //do
+        //{
+        //    builder.Length = 0;
+        //    bytes = await Stream.ReadAsync(data, 0, data.Length);
+        //    builder.Append(Encoding.UTF8.GetString(data, 0, bytes));
+        //}
+        //while (Stream.DataAvailable);
+        byte[] data = new byte[1024];
         StringBuilder builder = new StringBuilder();
-        int bytes = 0;
+        int bytesRead = 0;
         do
         {
             builder.Length = 0;
-            bytes = await Stream.ReadAsync(data, 0, data.Length);
-            builder.Append(Encoding.UTF8.GetString(data, 0, bytes));
-        }
-        while (Stream.DataAvailable);
+            bytesRead = await Stream.ReadAsync(data, 0, data.Length);
+            builder.Append(Encoding.UTF8.GetString(data, 0, bytesRead));
+
+            if (bytesRead == data.Length)
+                Array.Resize(ref data, data.Length * 2);
+
+        } while (Stream.DataAvailable);
 
         return builder.ToString();
     }
